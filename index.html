@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OTAdmin Suite — Módulos profissionais para OTServer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#070b12;--bg2:#0d1320;--bg3:#111927;
+  --purple:#7c3aed;--pl:#a78bfa;--pll:#ede9fe;
+  --green:#00ff88;--gd:#10b981;
+  --blue:#38bdf8;--red:#f87171;--cyan:#22d3ee;
+  --white:#f0f4ff;--gray:#8892a4;--grd:#3d4a5c;
+  --mono:'Share Tech Mono',monospace;
+  --head:'Orbitron',sans-serif;
+  --body:'Rajdhani',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--body);background:var(--bg);color:var(--white);overflow-x:hidden;cursor:none;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px;}
+
+/* CURSOR */
+#cur,#cur-ring{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);}
+#cur{width:10px;height:10px;background:var(--purple);box-shadow:0 0 16px var(--purple),0 0 40px rgba(124,58,237,.4);}
+#cur-ring{width:34px;height:34px;border:1px solid rgba(124,58,237,.5);z-index:9998;transition:width .3s,height .3s,border-color .3s;}
+
+/* CANVAS */
+#mc{position:fixed;inset:0;z-index:0;opacity:.3;pointer-events:none;}
+.scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.1) 2px,rgba(0,0,0,.1) 4px);}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(7,11,18,.8);backdrop-filter:blur(24px);border-bottom:1px solid rgba(124,58,237,.15);transition:border-color .3s;}
+nav.scrolled{border-bottom-color:rgba(124,58,237,.4);box-shadow:0 4px 40px rgba(0,0,0,.4);}
+.nlogo{font-family:var(--head);font-size:15px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:10px;letter-spacing:.1em;}
+.nlogo-ico{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,var(--purple),#4c1d95);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 20px rgba(124,58,237,.5);}
+.nlogo em{color:var(--pl);font-style:normal;}
+.nlinks{display:flex;align-items:center;gap:28px;list-style:none;}
+.nlinks a{font-family:var(--mono);font-size:11px;color:var(--gray);text-decoration:none;letter-spacing:.08em;transition:color .2s;position:relative;}
+.nlinks a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--pl);transform:scaleX(0);transition:transform .2s;transform-origin:left;}
+.nlinks a:hover{color:var(--white);}
+.nlinks a:hover::after{transform:scaleX(1);}
+.ncta{padding:8px 18px!important;border:1px solid var(--purple)!important;border-radius:3px!important;color:var(--pl)!important;}
+.ncta::after{display:none!important;}
+.ncta:hover{background:rgba(124,58,237,.15)!important;box-shadow:0 0 20px rgba(124,58,237,.3);}
+
+/* HERO */
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;z-index:2;overflow:hidden;}
+.hglow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.14) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.heyebrow{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:.25em;text-transform:uppercase;margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.heyebrow::before,.heyebrow::after{content:'';flex:1;max-width:70px;height:1px;background:var(--green);opacity:.35;}
+.htitle{font-family:var(--head);font-size:clamp(54px,11vw,120px);line-height:.95;font-weight:900;letter-spacing:.04em;margin-bottom:18px;}
+.htitle .l1{display:block;color:var(--white);}
+.htitle .l2{display:block;color:var(--pl);text-shadow:0 0 50px rgba(124,58,237,.7),0 0 100px rgba(124,58,237,.3);}
+
+/* Glitch */
+.glitch{position:relative;}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;}
+.glitch::before{color:var(--cyan);clip-path:polygon(0 25%,100% 25%,100% 45%,0 45%);animation:g1 4s infinite;text-shadow:3px 0 0 var(--cyan);}
+.glitch::after{color:var(--red);clip-path:polygon(0 65%,100% 65%,100% 78%,0 78%);animation:g2 4s infinite;text-shadow:-3px 0 0 var(--red);}
+@keyframes g1{0%,88%,100%{transform:translateX(0)}90%{transform:translateX(-5px)}93%{transform:translateX(5px)}96%{transform:translateX(-3px)}}
+@keyframes g2{0%,88%,100%{transform:translateX(0)}89%{transform:translateX(4px)}92%{transform:translateX(-4px)}95%{transform:translateX(3px)}}
+
+.hsub{font-size:clamp(14px,2vw,19px);color:var(--gray);max-width:580px;margin:0 auto 42px;line-height:1.75;font-weight:500;}
+.hsub em{color:var(--pl);font-style:normal;}
+.hbtns{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:60px;}
+
+/* Buttons */
+.btn-main{font-family:var(--mono);font-size:12px;letter-spacing:.1em;padding:14px 30px;border-radius:3px;text-decoration:none;cursor:none;background:var(--purple);color:var(--white);border:1px solid var(--purple);position:relative;overflow:hidden;transition:box-shadow .3s,transform .2s;box-shadow:0 0 30px rgba(124,58,237,.4);display:inline-block;}
+.btn-main::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:transform .5s;}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(124,58,237,.65);}
+.btn-main:hover::before{transform:translateX(100%);}
+.btn-ghost{font-family:var(--mono);font-size:12px;letter-spacing:.1em;padding:14px 30px;border-radius:3px;text-decoration:none;cursor:none;background:transparent;color:var(--gray);border:1px solid var(--grd);transition:border-color .2s,color .2s,box-shadow .2s;display:inline-block;}
+.btn-ghost:hover{border-color:var(--pl);color:var(--white);box-shadow:0 0 20px rgba(124,58,237,.2);}
+
+.hmods{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+.hmod{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 14px;border-radius:2px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid var(--grd);color:var(--gray);transition:border-color .2s,color .2s;cursor:default;}
+.hmod:hover{border-color:var(--purple);color:var(--white);}
+.dot{width:6px;height:6px;border-radius:50%;}
+.scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;color:var(--grd);letter-spacing:.2em;}
+.scroll-line{width:1px;height:48px;background:linear-gradient(var(--purple),transparent);animation:sp 1.8s ease-in-out infinite;}
+@keyframes sp{0%,100%{opacity:.3;transform:scaleY(.5);}50%{opacity:1;transform:scaleY(1);}}
+
+/* UTIL */
+.container{max-width:1160px;margin:0 auto;padding:0 32px;}
+.section{position:relative;z-index:2;padding:100px 0;}
+.eyebrow{font-family:var(--mono);font-size:10px;color:var(--pl);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:'//';color:var(--purple);opacity:.7;}
+.sec-title{font-family:var(--head);font-size:clamp(26px,4vw,48px);line-height:1.05;font-weight:700;letter-spacing:.05em;margin-bottom:16px;}
+.sec-sub{font-size:15px;color:var(--gray);max-width:520px;line-height:1.75;font-weight:500;}
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--grd) 25%,var(--grd) 75%,transparent);margin:0 32px;}
+
+/* COMPARE */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:56px;border-radius:8px;overflow:hidden;border:1px solid var(--grd);}
+.cmp-col{display:flex;flex-direction:column;}
+.cmp-head{padding:15px 22px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px;border-bottom:1px solid;}
+.cmp-head.bad{background:rgba(248,113,113,.1);color:#f87171;border-bottom-color:rgba(248,113,113,.2);}
+.cmp-head.good{background:rgba(0,255,136,.07);color:var(--green);border-bottom-color:rgba(0,255,136,.15);}
+.cmp-item{background:var(--bg2);padding:14px 22px;font-size:14px;font-weight:500;color:var(--gray);display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s;}
+.cmp-item:last-child{border-bottom:none;}
+.cmp-item:hover{background:var(--bg3);}
+.cmp-col.bad-col .cmp-item{border-left:2px solid rgba(248,113,113,.3);}
+.cmp-col.good-col .cmp-item{border-left:2px solid rgba(0,255,136,.25);color:var(--white);}
+
+/* ARCH */
+.arch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:56px;}
+.ac{background:var(--bg2);border:1px solid var(--grd);border-radius:8px;padding:26px 20px;position:relative;overflow:hidden;cursor:none;transition:transform .3s,border-color .3s,box-shadow .3s;}
+.ac::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.ac:hover{transform:translateY(-6px);}
+.ac.p::before{background:linear-gradient(90deg,var(--purple),var(--pl));}
+.ac.p:hover{border-color:var(--purple);box-shadow:0 14px 50px rgba(124,58,237,.22);}
+.ac.g::before{background:linear-gradient(90deg,var(--gd),var(--green));}
+.ac.g:hover{border-color:var(--gd);box-shadow:0 14px 50px rgba(16,185,129,.18);}
+.ac.b::before{background:linear-gradient(90deg,#2563eb,var(--blue));}
+.ac.b:hover{border-color:var(--blue);box-shadow:0 14px 50px rgba(56,189,248,.18);}
+.ac.r::before{background:linear-gradient(90deg,#dc2626,var(--red));}
+.ac.r:hover{border-color:var(--red);box-shadow:0 14px 50px rgba(248,113,113,.18);}
+.ac-num{font-family:var(--mono);font-size:9px;color:var(--grd);letter-spacing:.18em;margin-bottom:12px;}
+.ac-icon{font-size:30px;margin-bottom:12px;}
+.ac-title{font-family:var(--head);font-size:18px;letter-spacing:.08em;margin-bottom:8px;}
+.ac-sub{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:16px;}
+.ac-path{font-family:var(--mono);font-size:9px;color:var(--grd);background:var(--bg);padding:5px 9px;border-radius:3px;border:1px solid rgba(255,255,255,.05);}
+
+/* MOD SECTIONS */
+.modsec{position:relative;z-index:2;padding:100px 0;overflow:hidden;}
+.modsec.alt{background:linear-gradient(180deg,transparent,rgba(13,19,32,.6),transparent);}
+.modsec::before{content:'';position:absolute;width:550px;height:550px;border-radius:50%;opacity:.07;pointer-events:none;}
+.modsec.mp::before{background:var(--purple);left:-180px;top:0;}
+.modsec.mg::before{background:var(--gd);right:-180px;top:0;}
+.modsec.mb::before{background:var(--blue);left:-180px;top:0;}
+.modsec.mr::before{background:var(--red);right:-180px;top:0;}
+
+.mod-inner{display:grid;grid-template-columns:1fr 1fr;gap:76px;align-items:start;position:relative;z-index:1;}
+.mod-inner.flip{direction:rtl;}
+.mod-inner.flip>*{direction:ltr;}
+.mtag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;padding:5px 12px;border-radius:3px;margin-bottom:18px;border:1px solid currentColor;opacity:.9;}
+.mtitle{font-family:var(--head);font-size:clamp(28px,4.5vw,52px);letter-spacing:.08em;line-height:.95;margin-bottom:14px;}
+.msub{font-size:14px;color:var(--gray);line-height:1.8;margin-bottom:26px;font-weight:500;}
+.mfeats{display:flex;flex-direction:column;gap:9px;margin-bottom:24px;}
+.mfeat{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--gray);font-weight:500;transition:color .2s;}
+.mfeat:hover{color:var(--white);}
+.fic{width:20px;height:20px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+/* Screenshots */
+.sstack{display:flex;flex-direction:column;gap:10px;}
+.srow{display:grid;gap:10px;}
+.srow.c2{grid-template-columns:1fr 1fr;}
+.srow.c1{grid-template-columns:1fr;}
+.sf{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--grd);background:var(--bg2);transition:transform .3s,border-color .3s,box-shadow .3s;}
+.sf:hover{transform:scale(1.03);z-index:5;}
+.sf img{width:100%;height:auto;display:block;}
+.sf-cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(7,11,18,.95));padding:22px 10px 8px;font-family:var(--mono);font-size:9px;color:var(--grd);text-align:center;letter-spacing:.08em;opacity:0;transition:opacity .3s;}
+.sf:hover .sf-cap{opacity:1;}
+.sf.sp:hover{border-color:var(--purple);box-shadow:0 0 28px rgba(124,58,237,.28);}
+.sf.sg:hover{border-color:var(--gd);box-shadow:0 0 28px rgba(16,185,129,.25);}
+.sf.sb:hover{border-color:var(--blue);box-shadow:0 0 28px rgba(56,189,248,.25);}
+.sf.sr:hover{border-color:var(--red);box-shadow:0 0 28px rgba(248,113,113,.25);}
+
+/* Terminal */
+.term{background:var(--bg);border:1px solid var(--grd);border-radius:8px;overflow:hidden;}
+.term-bar{background:var(--bg2);padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--grd);}
+.td{width:10px;height:10px;border-radius:50%;}
+.term-lbl{font-family:var(--mono);font-size:10px;color:var(--grd);margin-left:auto;letter-spacing:.1em;}
+.term-body{padding:18px;}
+.tl{font-family:var(--mono);font-size:11px;color:var(--gray);margin-bottom:9px;display:flex;gap:10px;}
+.tl .pr{color:var(--green);flex-shrink:0;}
+.tl .cm{color:var(--white);}
+.tl .vl{color:var(--pl);}
+.tok{margin-top:14px;padding:11px 14px;border-radius:4px;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.18);font-family:var(--mono);font-size:11px;color:var(--green);display:flex;align-items:center;gap:10px;}
+.tstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.ts{background:var(--bg2);border-radius:4px;padding:12px;text-align:center;border:1px solid var(--grd);}
+.ts-v{font-family:var(--head);font-size:22px;letter-spacing:.05em;margin-bottom:4px;}
+.ts-l{font-family:var(--mono);font-size:9px;color:var(--grd);letter-spacing:.1em;}
+
+/* Flow */
+.flow{display:flex;background:var(--bg2);border:1px solid var(--grd);border-radius:8px;overflow:hidden;margin-top:26px;}
+.fs{flex:1;padding:18px 10px;text-align:center;border-right:1px solid var(--grd);transition:background .2s;}
+.fs:last-child{border-right:none;}
+.fs:hover{background:rgba(16,185,129,.05);}
+.fn{font-family:var(--head);font-size:22px;margin-bottom:5px;letter-spacing:.05em;}
+.ft{font-family:var(--mono);font-size:10px;color:var(--white);letter-spacing:.06em;margin-bottom:3px;}
+.fss{font-size:11px;color:var(--gray);}
+
+/* PACKAGES */
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:56px;margin-bottom:14px;}
+.pkc{background:var(--bg2);border:1px solid var(--grd);border-radius:8px;padding:26px 18px;position:relative;overflow:hidden;cursor:none;transition:transform .3s,border-color .3s,box-shadow .3s;}
+.pkc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.pkc:hover{transform:translateY(-8px);}
+.pkc.p::before{background:linear-gradient(90deg,var(--purple),var(--pl));}
+.pkc.p:hover{border-color:var(--purple);box-shadow:0 20px 60px rgba(124,58,237,.22);}
+.pkc.g::before{background:linear-gradient(90deg,var(--gd),var(--green));}
+.pkc.g:hover{border-color:var(--gd);box-shadow:0 20px 60px rgba(16,185,129,.18);}
+.pkc.b::before{background:linear-gradient(90deg,#2563eb,var(--blue));}
+.pkc.b:hover{border-color:var(--blue);box-shadow:0 20px 60px rgba(56,189,248,.18);}
+.pkc.r::before{background:linear-gradient(90deg,#dc2626,var(--red));}
+.pkc.r:hover{border-color:var(--red);box-shadow:0 20px 60px rgba(248,113,113,.18);}
+.pk-icon{font-size:34px;margin-bottom:14px;}
+.pk-title{font-family:var(--head);font-size:18px;letter-spacing:.08em;margin-bottom:9px;}
+.pk-desc{font-size:12px;color:var(--gray);line-height:1.65;margin-bottom:18px;font-weight:500;}
+.pk-il{font-family:var(--mono);font-size:9px;color:var(--grd);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;}
+.pk-i{font-size:12px;color:var(--white);font-weight:600;}
+
+.suite-bar{background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.35);border-radius:8px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 0 60px rgba(124,58,237,.08);}
+.sb-l{display:flex;align-items:center;gap:16px;}
+.sb-icon{font-size:34px;}
+.sb-title{font-family:var(--head);font-size:18px;letter-spacing:.06em;margin-bottom:4px;}
+.sb-sub{font-size:12px;color:var(--pl);font-weight:500;}
+.sb-r{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.sb-ck{font-family:var(--mono);font-size:11px;color:var(--green);display:flex;align-items:center;gap:7px;letter-spacing:.05em;}
+
+/* STEPS */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;position:relative;}
+.steps-grid::before{content:'';position:absolute;top:37px;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--grd),var(--grd),transparent);z-index:0;}
+.stc{background:var(--bg2);border:1px solid var(--grd);padding:26px 18px;text-align:center;position:relative;z-index:1;transition:border-color .3s,box-shadow .3s;}
+.stc:first-child{border-radius:8px 0 0 8px;}
+.stc:last-child{border-radius:0 8px 8px 0;}
+.stc+.stc{border-left:none;}
+.stc:hover{border-color:var(--purple);box-shadow:inset 0 0 30px rgba(124,58,237,.05);}
+.stn-wrap{width:54px;height:54px;border-radius:50%;margin:0 auto 16px;background:var(--bg);border:1px solid var(--grd);display:flex;align-items:center;justify-content:center;transition:border-color .3s,box-shadow .3s;}
+.stc:hover .stn-wrap{border-color:var(--purple);box-shadow:0 0 18px rgba(124,58,237,.3);}
+.stn{font-family:var(--head);font-size:18px;color:var(--pl);}
+.st-title{font-family:var(--head);font-size:14px;letter-spacing:.06em;margin-bottom:9px;}
+.st-desc{font-size:12px;color:var(--gray);line-height:1.65;font-weight:500;}
+
+.needs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px;}
+.nc{background:var(--bg2);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:20px 18px;transition:border-color .2s;}
+.nc:hover{border-color:rgba(124,58,237,.5);}
+.nc-title{font-family:var(--mono);font-size:10px;color:var(--pl);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid rgba(124,58,237,.14);}
+.ni{font-size:12px;color:var(--gray);margin-bottom:7px;font-weight:500;display:flex;align-items:flex-start;gap:7px;}
+.ni::before{content:'›';color:var(--pl);flex-shrink:0;}
+
+/* CTA */
+#cta{position:relative;z-index:2;padding:100px 0 80px;text-align:center;overflow:hidden;}
+#cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 65% at 50% 50%,rgba(124,58,237,.1),transparent);pointer-events:none;}
+.cta-title{font-family:var(--head);font-size:clamp(30px,6vw,68px);letter-spacing:.08em;line-height:1.0;margin-bottom:18px;}
+.cta-title em{color:var(--pl);font-style:normal;text-shadow:0 0 40px rgba(124,58,237,.55);}
+.cta-sub{font-size:16px;color:var(--gray);max-width:500px;margin:0 auto 42px;line-height:1.75;font-weight:500;}
+.cta-badges{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:60px;}
+.ctab{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:8px 16px;border-radius:3px;border:1px solid var(--grd);color:var(--gray);display:flex;align-items:center;gap:7px;transition:border-color .2s,color .2s;}
+.ctab:hover{border-color:var(--purple);color:var(--white);}
+
+/* FOOTER */
+footer{position:relative;z-index:2;border-top:1px solid var(--grd);padding:26px 32px;text-align:center;}
+footer p{font-family:var(--mono);font-size:10px;color:var(--grd);letter-spacing:.1em;}
+footer strong{color:var(--pl);}
+
+/* INITIAL STATES */
+.fu{opacity:0;transform:translateY(40px);}
+.fl{opacity:0;transform:translateX(-50px);}
+.fr{opacity:0;transform:translateX(50px);}
+.fi{opacity:0;}
+.su{opacity:0;transform:scale(.86);}
+
+/* COLOR HELPERS */
+.cp{color:var(--pl);}
+.cg{color:var(--green);}
+.cb{color:var(--blue);}
+.cr{color:var(--red);}
+.bp{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);}
+.bg2c{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.22);}
+.bbc{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.28);}
+.brc{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.28);}
+.fip{background:rgba(124,58,237,.2);color:var(--pl);}
+.fig{background:rgba(0,255,136,.1);color:var(--green);}
+.fib{background:rgba(56,189,248,.1);color:var(--blue);}
+.fir{background:rgba(248,113,113,.1);color:var(--red);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .mod-inner,.mod-inner.flip{grid-template-columns:1fr;direction:ltr;}
+  .arch-grid{grid-template-columns:1fr 1fr;}
+  .pkg-grid{grid-template-columns:1fr 1fr;}
+  .steps-grid{grid-template-columns:1fr 1fr;border-radius:8px;}
+  .steps-grid::before{display:none;}
+  .stc+.stc{border-left:1px solid var(--grd);}
+  .cmp-grid{grid-template-columns:1fr;}
+  .cmp-col.bad-col{display:none;}
+  .needs-grid{grid-template-columns:1fr;}
+  nav .nlinks{display:none;}
+  .srow.c2{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .arch-grid,.pkg-grid{grid-template-columns:1fr;}
+  .steps-grid{grid-template-columns:1fr;}
+  .stc{border-radius:0!important;border-left:1px solid var(--grd)!important;}
+  .stc:first-child{border-radius:8px 8px 0 0!important;}
+  .stc:last-child{border-radius:0 0 8px 8px!important;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<canvas id="mc"></canvas>
+<div class="scanlines"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nlogo">
+    <div class="nlogo-ico">⚙</div>
+    OTAdmin <em>Suite</em>
+  </a>
+  <ul class="nlinks">
+    <li><a href="#problema">Problema</a></li>
+    <li><a href="#modulos">Módulos</a></li>
+    <li><a href="#pacotes">Pacotes</a></li>
+    <li><a href="#instalacao">Instalação</a></li>
+    <li><a href="#cta" class="ncta">Contato</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hglow"></div>
+  <div>
+    <div class="heyebrow fi" id="he">BOT DISCORD SUITE &nbsp;·&nbsp; V1.0</div>
+    <h1 class="htitle">
+      <span class="l1 glitch fu" id="t1" data-text="OTAdmin">OTAdmin</span>
+      <span class="l2 glitch fu" id="t2" data-text="Suite">Suite</span>
+    </h1>
+    <p class="hsub fu" id="hs">
+      Automação, monetização e segurança para o seu servidor de Tibia.<br>
+      <em>Módulos profissionais integrados diretamente ao Discord.</em>
+    </p>
+    <div class="hbtns fu" id="hb">
+      <a href="#modulos" class="btn-main">[ VER OS MÓDULOS ]</a>
+      <a href="#pacotes" class="btn-ghost">[ PACOTES E PREÇOS ]</a>
+    </div>
+    <div class="hmods fu" id="hm">
+      <div class="hmod"><div class="dot" style="background:var(--purple)"></div>SupportDesk</div>
+      <div class="hmod"><div class="dot" style="background:var(--green)"></div>PixGateway</div>
+      <div class="hmod"><div class="dot" style="background:var(--blue)"></div>PartnerHub</div>
+      <div class="hmod"><div class="dot" style="background:var(--red)"></div>MultiGuard</div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>SCROLL</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="section" id="problema">
+  <div class="container">
+    <p class="eyebrow fu">O problema</p>
+    <h2 class="sec-title fu">Gerenciar servidor<br>não precisa ser caos</h2>
+    <p class="sec-sub fu">Servidores de Tibia enfrentam os mesmos desafios diariamente. O OTAdmin Suite resolve cada um deles com automação real.</p>
+    <div class="cmp-grid">
+      <div class="cmp-col bad-col">
+        <div class="cmp-head bad">✗ &nbsp;SEM OTADMIN SUITE</div>
+        <div class="cmp-item fl">😩 &nbsp;Atendimento bagunçado via mensagem direta</div>
+        <div class="cmp-item fl">😩 &nbsp;Pagamentos PIX conferidos na mão</div>
+        <div class="cmp-item fl">😩 &nbsp;Parcerias sem fluxo definido</div>
+        <div class="cmp-item fl">😩 &nbsp;Multiclient difícil de detectar</div>
+        <div class="cmp-item fl">😩 &nbsp;Staff sobrecarregada com tarefas repetitivas</div>
+        <div class="cmp-item fl">😩 &nbsp;Histórico de atendimentos se perde por DM</div>
+      </div>
+      <div class="cmp-col good-col">
+        <div class="cmp-head good">✓ &nbsp;COM OTADMIN SUITE</div>
+        <div class="cmp-item fr">✅ &nbsp;Tickets organizados com log completo</div>
+        <div class="cmp-item fr">✅ &nbsp;Geração e verificação automática de cobranças</div>
+        <div class="cmp-item fr">✅ &nbsp;Canal estruturado com candidatura e aprovação</div>
+        <div class="cmp-item fr">✅ &nbsp;Painel automático com agrupamento por IP</div>
+        <div class="cmp-item fr">✅ &nbsp;Automação total dos processos mais comuns</div>
+        <div class="cmp-item fr">✅ &nbsp;Transcript completo salvo em log</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- ARQUITETURA -->
+<section class="section" id="modulos">
+  <div class="container">
+    <p class="eyebrow fu">Arquitetura</p>
+    <h2 class="sec-title fu">Modular por natureza</h2>
+    <p class="sec-sub fu">Um motor central com módulos independentes — instale apenas o que precisar, sem interferência entre módulos.</p>
+    <div class="arch-grid">
+      <div class="ac p su"><div class="ac-num">// MÓDULO 01</div><div class="ac-icon">🎫</div><div class="ac-title">SupportDesk</div><div class="ac-sub">Tickets e atendimento com logs e transcripts completos.</div><div class="ac-path">data/scripts/tickets/</div></div>
+      <div class="ac g su"><div class="ac-num">// MÓDULO 02</div><div class="ac-icon">💳</div><div class="ac-title">PixGateway</div><div class="ac-sub">Pagamentos PIX automáticos com entrega de coins.</div><div class="ac-path">data/scripts/pagamentos-pix/</div></div>
+      <div class="ac b su"><div class="ac-num">// MÓDULO 03</div><div class="ac-icon">🎯</div><div class="ac-title">PartnerHub</div><div class="ac-sub">Parcerias com streamers e sorteios automatizados.</div><div class="ac-path">data/scripts/streamers-sorteios/</div></div>
+      <div class="ac r su"><div class="ac-num">// MÓDULO 04</div><div class="ac-icon">🛡️</div><div class="ac-title">MultiGuard</div><div class="ac-sub">Monitor multiclient com painel por IP em tempo real.</div><div class="ac-path">data/scripts/multiclient/</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- SUPPORTDESK -->
+<section class="modsec mp" id="supportdesk">
+  <div class="container">
+    <div class="mod-inner">
+      <div>
+        <span class="mtag cp bp fu">// MÓDULO 01</span>
+        <h2 class="mtitle fu">Support<br>Desk</h2>
+        <p class="msub fu">Transforma o suporte do servidor em um fluxo profissional, auditável e organizado — sem mensagens soltas no Discord.</p>
+        <div class="mfeats">
+          <div class="mfeat fl"><div class="fic fip">✓</div> Painel com botões por categoria de atendimento</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Abertura automática de canal privado por ticket</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Botão de assumir ticket pela staff com prioridade</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Transcript completo do atendimento por DM</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Avaliação pós-atendimento pelo jogador</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Texto personalizado por categoria de ticket</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Controle de acesso por cargos da staff</div>
+          <div class="mfeat fl"><div class="fic fip">✓</div> Histórico completo no canal de logs</div>
+        </div>
+      </div>
+      <div class="sstack fr">
+        <div class="srow c1"><div class="sf sp"><img src="assets/image1.png" alt="Painel boas-vindas" loading="lazy"/><div class="sf-cap">Painel de boas-vindas — seleção de categoria</div></div></div>
+        <div class="srow c2">
+          <div class="sf sp"><img src="assets/image2.png" alt="Categorias" loading="lazy"/><div class="sf-cap">Dropdown de categorias</div></div>
+          <div class="sf sp"><img src="assets/image11.png" alt="Ticket aberto" loading="lazy"/><div class="sf-cap">Ticket com botões de ação</div></div>
+        </div>
+        <div class="srow c2">
+          <div class="sf sp"><img src="assets/image9.png" alt="Canais" loading="lazy"/><div class="sf-cap">Canais por categoria</div></div>
+          <div class="sf sp"><img src="assets/image12.png" alt="Mensagem" loading="lazy"/><div class="sf-cap">Mensagem personalizada</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mod-inner" style="margin-top:60px;align-items:center;">
+      <div class="sstack fl"><div class="srow c1"><div class="sf sp"><img src="assets/image10.png" alt="Logs" loading="lazy"/><div class="sf-cap">Canal de logs com transcripts completos</div></div></div></div>
+      <div class="fr">
+        <p class="eyebrow">Rastreabilidade total</p>
+        <h3 style="font-family:var(--head);font-size:28px;letter-spacing:.08em;margin-bottom:12px;line-height:1.1;">Nenhum atendimento<br>se perde</h3>
+        <p style="font-size:13px;color:var(--gray);line-height:1.8;font-weight:500;">Quando um ticket é fechado, transcript completo é gerado e enviado ao canal de logs e ao jogador via DM. Histórico disponível para consulta a qualquer momento.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- PIXGATEWAY -->
+<section class="modsec alt mg" id="pixgateway">
+  <div class="container">
+    <div class="mod-inner flip">
+      <div>
+        <span class="mtag cg bg2c fu">// MÓDULO 02</span>
+        <h2 class="mtitle fu">Pix<br>Gateway</h2>
+        <p class="msub fu">Automatiza todo o fluxo de compra: da geração do QR Code PIX até a confirmação e entrega dos itens no jogo — zero intervenção manual.</p>
+        <div class="mfeats">
+          <div class="mfeat fr"><div class="fic fig">✓</div> Geração de cobrança PIX diretamente no Discord</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> QR Code e código copia-e-cola automáticos</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Verificação automática via API do gateway</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Entrega de coins automática no banco MySQL</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Histórico de compras por jogador</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Relatório financeiro por período</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Suporte a cupons de desconto</div>
+          <div class="mfeat fr"><div class="fic fig">✓</div> Painel de shop completo no Discord</div>
+        </div>
+        <div class="flow fu">
+          <div class="fs"><div class="fn" style="color:var(--green)">01</div><div class="ft">JOGADOR</div><div class="fss">Executa /pix</div></div>
+          <div class="fs"><div class="fn" style="color:var(--blue)">02</div><div class="ft">SISTEMA</div><div class="fss">Gera QR Code</div></div>
+          <div class="fs"><div class="fn" style="color:var(--pl)">03</div><div class="ft">GATEWAY</div><div class="fss">Confirma via API</div></div>
+          <div class="fs"><div class="fn" style="color:var(--red)">04</div><div class="ft">ENTREGA</div><div class="fss">Coins automáticas</div></div>
+        </div>
+      </div>
+      <div class="fl">
+        <div class="term">
+          <div class="term-bar">
+            <div class="td" style="background:#f87171"></div>
+            <div class="td" style="background:#fbbf24"></div>
+            <div class="td" style="background:var(--green)"></div>
+            <span class="term-lbl">pix-gateway · discord-bot</span>
+          </div>
+          <div class="term-body">
+            <div class="tl"><span class="pr">›</span><span><span class="cm">EVENTO</span> <span class="vl">interactionCreate</span></span></div>
+            <div class="tl"><span class="pr">›</span><span><span class="cm">COMANDO</span> <span class="vl">/pix produto:"500 Coins"</span></span></div>
+            <div class="tl"><span class="pr">›</span><span><span class="cm">PIX</span> QR Code gerado · R$ 50,00</span></div>
+            <div class="tl"><span class="pr">›</span><span><span class="cm">AGUARDANDO</span> confirmação do gateway…</span></div>
+            <div class="tl"><span class="pr">›</span><span><span class="cm">WEBHOOK</span> <span style="color:var(--green)">payment.approved ✓</span></span></div>
+            <div class="tl"><span class="pr">›</span><span><span class="cm">MySQL</span> UPDATE accounts SET coins = coins + 500</span></div>
+            <div class="tok">✅ &nbsp;500 coins creditadas em <strong>royman</strong></div>
+            <div class="tstats">
+              <div class="ts"><div class="ts-v" style="color:var(--green)">0s</div><div class="ts-l">intervenção manual</div></div>
+              <div class="ts"><div class="ts-v" style="color:var(--green)">&lt;60s</div><div class="ts-l">da compra à entrega</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- PARTNERHUB -->
+<section class="modsec mb" id="partnerhub">
+  <div class="container">
+    <div class="mod-inner">
+      <div>
+        <span class="mtag cb bbc fu">// MÓDULO 03</span>
+        <h2 class="mtitle fu">Partner<br>Hub</h2>
+        <p class="msub fu">Profissionaliza o marketing do servidor com fluxo estruturado para parcerias com streamers e campanhas de sorteio automatizadas.</p>
+        <div class="mfeats">
+          <div class="mfeat fl"><div class="fic fib">✓</div> Canal de candidatura formal para streamers</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Fluxo de aprovação de parcerias pela staff</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Geração de códigos promocionais personalizados</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Sistema de sorteio automatizado no Discord</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Streamer vinculado ao cupom para cashback</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Painel de códigos emitidos e utilizados</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Log completo de ações promocionais</div>
+          <div class="mfeat fl"><div class="fic fib">✓</div> Histórico de campanhas realizadas</div>
+        </div>
+      </div>
+      <div class="sstack fr">
+        <div class="srow c2">
+          <div class="sf sb"><img src="assets/image13.png" alt="Painel geração" loading="lazy"/><div class="sf-cap">Painel de geração de códigos</div></div>
+          <div class="sf sb"><img src="assets/image5.png" alt="Códigos emitidos" loading="lazy"/><div class="sf-cap">Códigos emitidos e usados</div></div>
+        </div>
+        <div class="srow c2">
+          <div class="sf sb"><img src="assets/image7.png" alt="Modal sorteio" loading="lazy"/><div class="sf-cap">Modal de uso do código</div></div>
+          <div class="sf sb"><img src="assets/image6.png" alt="Streamer" loading="lazy"/><div class="sf-cap">Seleção do streamer parceiro</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- MULTIGUARD -->
+<section class="modsec alt mr" id="multiguard">
+  <div class="container">
+    <div class="mod-inner flip">
+      <div>
+        <span class="mtag cr brc fu">// MÓDULO 04</span>
+        <h2 class="mtitle fu">Multi<br>Guard</h2>
+        <p class="msub fu">Monitora multiclient em tempo real lendo diretamente do banco MySQL e exibindo um painel administrativo completo no Discord.</p>
+        <div class="mfeats">
+          <div class="mfeat fr"><div class="fic fir">✓</div> Leitura automática de jogadores online</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Agrupamento de conexões por IP</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Detecção de excesso de personagens por IP</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Identificação de up simultâneo suspeito</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Painel administrativo atualizado automaticamente</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Histórico recente de alertas no Discord</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Configuração de limites por IP</div>
+          <div class="mfeat fr"><div class="fic fir">✓</div> Integração direta com banco MySQL</div>
+        </div>
+      </div>
+      <div class="sstack fl">
+        <div class="srow c1"><div class="sf sr"><img src="assets/image4.png" alt="Painel auditoria" loading="lazy"/><div class="sf-cap">Painel completo de auditoria multicliente</div></div></div>
+        <div class="srow c1"><div class="sf sr"><img src="assets/image3.png" alt="Alertas" loading="lazy"/><div class="sf-cap">Alertas de up suspeito em massa por IP</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- PACOTES -->
+<section class="section" id="pacotes">
+  <div class="container">
+    <p class="eyebrow fu">Contratação</p>
+    <h2 class="sec-title fu">Pacotes flexíveis</h2>
+    <p class="sec-sub fu">Contrate apenas o módulo que precisar — ou adquira a Suite Completa com o melhor custo-benefício.</p>
+    <div class="pkg-grid">
+      <div class="pkc p su"><div class="pk-icon">🎫</div><div class="pk-title">SupportDesk</div><div class="pk-desc">Tickets, logs, transcript completo e avaliação pós-atendimento.</div><div class="pk-il">// ideal para</div><div class="pk-i">Qualquer servidor com suporte ativo</div></div>
+      <div class="pkc g su"><div class="pk-icon">💳</div><div class="pk-title">PixGateway</div><div class="pk-desc">PIX automatizado, shop, histórico e relatório financeiro.</div><div class="pk-il">// ideal para</div><div class="pk-i">Servidores com vendas e donates</div></div>
+      <div class="pkc b su"><div class="pk-icon">🎯</div><div class="pk-title">PartnerHub</div><div class="pk-desc">Parcerias com streamers, sorteios e códigos promocionais.</div><div class="pk-il">// ideal para</div><div class="pk-i">Servidores focados em crescimento</div></div>
+      <div class="pkc r su"><div class="pk-icon">🛡️</div><div class="pk-title">MultiGuard</div><div class="pk-desc">Monitoramento por IP, painel de auditoria e alertas em tempo real.</div><div class="pk-il">// ideal para</div><div class="pk-i">Servidores com regra de multiclient</div></div>
+    </div>
+    <div class="suite-bar fu">
+      <div class="sb-l">
+        <div class="sb-icon">⚡</div>
+        <div>
+          <div class="sb-title">Suite Completa — Todos os 4 módulos</div>
+          <div class="sb-sub">Motor base + SupportDesk + PixGateway + PartnerHub + MultiGuard</div>
+        </div>
+      </div>
+      <div class="sb-r">
+        <div class="sb-ck">✓ Melhor custo-benefício</div>
+        <div class="sb-ck">✓ Instalação inclusa em até 48h</div>
+        <a href="#cta" class="btn-main">[ SOLICITAR PROPOSTA ]</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- INSTALAÇÃO -->
+<section class="section" id="instalacao">
+  <div class="container">
+    <p class="eyebrow fu">Processo</p>
+    <h2 class="sec-title fu">Do contato à entrega<br>em até 48 horas</h2>
+    <p class="sec-sub fu">Você não precisa configurar nada. O desenvolvedor cuida de tudo.</p>
+    <div class="steps-grid">
+      <div class="stc su"><div class="stn-wrap"><div class="stn">01</div></div><div class="st-title">Contato e coleta</div><div class="st-desc">Você envia as informações pelo checklist padrão: dados do Discord, banco e configurações do servidor.</div></div>
+      <div class="stc su"><div class="stn-wrap"><div class="stn">02</div></div><div class="st-title">Configuração</div><div class="st-desc">O desenvolvedor configura o bot, conecta ao banco MySQL e organiza os canais do Discord.</div></div>
+      <div class="stc su"><div class="stn-wrap"><div class="stn">03</div></div><div class="st-title">Deploy e testes</div><div class="st-desc">Comandos registrados e sistema testado e validado completamente antes da entrega.</div></div>
+      <div class="stc su"><div class="stn-wrap"><div class="stn">04</div></div><div class="st-title">Entrega</div><div class="st-desc">Você recebe o sistema funcionando com instruções completas de uso para toda a staff.</div></div>
+    </div>
+    <p class="eyebrow fu" style="margin-top:60px;">O que você precisará fornecer</p>
+    <div class="needs-grid">
+      <div class="nc fu"><div class="nc-title">Discord</div><div class="ni">Token do bot e Client ID</div><div class="ni">Guild ID do servidor</div><div class="ni">IDs dos canais e categorias</div><div class="ni">Cargos da staff com acesso</div></div>
+      <div class="nc fu"><div class="nc-title">Banco de Dados</div><div class="ni">Host, porta e nome do banco MySQL</div><div class="ni">Usuário e senha do banco</div><div class="ni">Liberação de acesso remoto</div><div class="ni">Estrutura das tabelas principais</div></div>
+      <div class="nc fu"><div class="nc-title">Configurações</div><div class="ni">Regras do servidor (multiclient, etc.)</div><div class="ni">Lista de produtos e preços</div><div class="ni">Credenciais do gateway de pagamento</div><div class="ni">Definição de canais de log</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="hr"></div>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="container">
+    <p class="eyebrow fu" style="justify-content:center;display:flex;">Vamos começar</p>
+    <h2 class="cta-title fu">Pronto para profissionalizar<br><em>o seu servidor?</em></h2>
+    <p class="cta-sub fu">Adquira os módulos do OTAdmin Suite e transforme seu Discord em uma plataforma completa de gestão para o seu OTServer.</p>
+    <div class="fu" style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+      <a href="https://discord.gg/" class="btn-main" target="_blank">[ 💬 ENTRAR EM CONTATO ]</a>
+      <a href="#pacotes" class="btn-ghost">[ VER PACOTES ]</a>
+    </div>
+    <div class="cta-badges fu">
+      <div class="ctab">🎫 SupportDesk</div>
+      <div class="ctab">💳 PixGateway</div>
+      <div class="ctab">🎯 PartnerHub</div>
+      <div class="ctab">🛡️ MultiGuard</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>OTAdmin Suite</strong> &nbsp;·&nbsp; Módulos profissionais para servidores de Tibia &nbsp;·&nbsp; v1.0</p>
+</footer>
+
+<script>
+// ── CURSOR ─────────────────────────────────────
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function tick(){
+  rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
+  cur.style.cssText=`left:${mx}px;top:${my}px;`;
+  ring.style.cssText=`left:${rx}px;top:${ry}px;`;
+  requestAnimationFrame(tick);
+})();
+
+// ── NAV ────────────────────────────────────────
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>30));
+
+// ── MATRIX RAIN ────────────────────────────────
+(()=>{
+  const c=document.getElementById('mc'),ctx=c.getContext('2d');
+  const CHARS='01アイウエオカキクケコサシスセソ{}[]<>/\\=+-*&#@!?0110';
+  const FS=13;
+  let W,H,cols,drops;
+  const init=()=>{
+    W=c.width=innerWidth; H=c.height=innerHeight;
+    cols=Math.floor(W/FS);
+    drops=Array.from({length:cols},()=>Math.random()*-120);
+  };
+  init(); addEventListener('resize',init);
+  setInterval(()=>{
+    ctx.fillStyle='rgba(7,11,18,0.055)';
+    ctx.fillRect(0,0,W,H);
+    drops.forEach((y,i)=>{
+      const ch=CHARS[Math.floor(Math.random()*CHARS.length)];
+      const x=i*FS;
+      const r=Math.random();
+      if(r>.98){ctx.fillStyle='#a78bfa';ctx.font='bold '+FS+'px Share Tech Mono,monospace';ctx.shadowColor='#7c3aed';ctx.shadowBlur=14;}
+      else if(r>.95){ctx.fillStyle='#00ff88';ctx.font=FS+'px Share Tech Mono,monospace';ctx.shadowColor='#00ff88';ctx.shadowBlur=8;}
+      else{ctx.fillStyle='rgba(70,45,130,0.55)';ctx.font=FS+'px Share Tech Mono,monospace';ctx.shadowBlur=0;}
+      ctx.fillText(ch,x,y*FS);
+      ctx.shadowBlur=0;
+      if(y*FS>H&&Math.random()>.975)drops[i]=0;
+      drops[i]+=.5;
+    });
+  },48);
+})();
+
+// ── GSAP SCROLLTRIGGER ─────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero
+gsap.timeline()
+  .to('#he', {opacity:1,duration:.5,ease:'power2.out'})
+  .to('#t1', {opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.2')
+  .to('#t2', {opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.5')
+  .to('#hs', {opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.3')
+  .to('#hb', {opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.3')
+  .to('#hm', {opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.3');
+
+// Scroll reveals
+document.querySelectorAll('.fu').forEach(el=>{
+  gsap.to(el,{scrollTrigger:{trigger:el,start:'top 92%'},opacity:1,y:0,duration:.7,ease:'power3.out'});
+});
+document.querySelectorAll('.fl').forEach((el,i)=>{
+  gsap.to(el,{scrollTrigger:{trigger:el,start:'top 92%'},opacity:1,x:0,duration:.6,delay:i*.05,ease:'power3.out'});
+});
+document.querySelectorAll('.fr').forEach((el,i)=>{
+  gsap.to(el,{scrollTrigger:{trigger:el,start:'top 92%'},opacity:1,x:0,duration:.6,delay:i*.05,ease:'power3.out'});
+});
+document.querySelectorAll('.fi').forEach(el=>{
+  gsap.to(el,{scrollTrigger:{trigger:el,start:'top 92%'},opacity:1,duration:.8,ease:'power2.out'});
+});
+document.querySelectorAll('.su').forEach((el)=>{
+  const siblings=[...el.parentElement.querySelectorAll('.su')];
+  const idx=siblings.indexOf(el);
+  gsap.to(el,{
+    scrollTrigger:{trigger:el.parentElement,start:'top 87%'},
+    opacity:1,scale:1,y:0,duration:.6,delay:idx*.08,ease:'back.out(1.5)'
+  });
+});
+
+// Nav active
+const sections=[...document.querySelectorAll('section[id]')];
+const links=[...document.querySelectorAll('.nlinks a')];
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(scrollY>=s.offsetTop-140)cur=s.id;});
+  links.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--white)':'';});
+},{ passive:true });
+</script>
+</body>
+</html>
