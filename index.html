@@ -272,6 +272,121 @@ footer strong{color:var(--pl);}
 .fib{background:rgba(56,189,248,.1);color:var(--blue);}
 .fir{background:rgba(248,113,113,.1);color:var(--red);}
 
+/* ═══════ MODAL LIGHTBOX ═══════ */
+.sf{cursor:none;}
+.sf::after{
+  content:'⊕ VER DETALHES';
+  position:absolute;inset:0;z-index:3;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  color:var(--white);background:rgba(7,11,18,.0);
+  opacity:0;transition:opacity .25s,background .25s;
+}
+.sf:hover::after{opacity:1;background:rgba(7,11,18,.55);}
+
+/* Overlay backdrop — blurs the site content */
+#modal-backdrop{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(7,11,18,.92);
+  backdrop-filter:blur(18px);
+  opacity:0;pointer-events:none;
+  transition:opacity .4s ease;
+}
+#modal-backdrop.open{opacity:1;pointer-events:all;}
+
+/* Modal container */
+#modal{
+  position:fixed;inset:0;z-index:501;
+  display:flex;flex-direction:column;
+  padding:80px 40px 40px;
+  opacity:0;pointer-events:none;
+  transform:scale(.96);
+  transition:opacity .4s ease,transform .4s ease;
+  overflow-y:auto;
+}
+#modal.open{opacity:1;pointer-events:all;transform:scale(1);}
+
+/* Modal top bar */
+#modal-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:36px;flex-shrink:0;
+}
+#modal-mod-tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  padding:5px 14px;border-radius:3px;border:1px solid currentColor;opacity:.9;
+}
+#modal-mod-title{
+  font-family:var(--head);font-size:clamp(20px,3vw,36px);
+  letter-spacing:.08em;margin-left:20px;
+}
+#modal-topbar-left{display:flex;align-items:center;gap:0;}
+#modal-close-btn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.15em;
+  color:var(--gray);background:transparent;border:1px solid var(--grd);
+  padding:8px 16px;border-radius:3px;cursor:none;
+  transition:color .2s,border-color .2s,box-shadow .2s;
+  display:flex;align-items:center;gap:8px;
+}
+#modal-close-btn:hover{color:var(--white);border-color:var(--pl);box-shadow:0 0 18px rgba(124,58,237,.3);}
+
+/* Modal body: image left, info right */
+#modal-body{
+  display:grid;grid-template-columns:1fr 400px;gap:40px;
+  align-items:start;flex:1;
+}
+#modal-img-wrap{
+  border-radius:8px;overflow:hidden;
+  border:1px solid var(--grd);
+  position:relative;
+}
+#modal-img-wrap img{width:100%;height:auto;display:block;}
+#modal-img-nav{
+  display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;
+}
+.modal-thumb{
+  width:72px;height:52px;border-radius:4px;overflow:hidden;
+  border:1px solid var(--grd);cursor:none;opacity:.5;
+  transition:opacity .2s,border-color .2s;flex-shrink:0;
+}
+.modal-thumb img{width:100%;height:100%;object-fit:cover;}
+.modal-thumb.active,.modal-thumb:hover{opacity:1;}
+
+/* Info panel */
+#modal-info{display:flex;flex-direction:column;gap:20px;}
+#modal-desc{font-size:14px;color:var(--gray);line-height:1.8;font-weight:500;}
+#modal-table{
+  background:var(--bg2);border:1px solid var(--grd);border-radius:8px;
+  overflow:hidden;
+}
+.mt-head{
+  padding:10px 16px;font-family:var(--mono);font-size:9px;
+  letter-spacing:.18em;text-transform:uppercase;
+  background:rgba(124,58,237,.12);color:var(--pl);
+  border-bottom:1px solid var(--grd);
+}
+.mt-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;font-size:12px;font-weight:500;color:var(--gray);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  transition:background .15s;
+}
+.mt-row:last-child{border-bottom:none;}
+.mt-row:hover{background:var(--bg3);color:var(--white);}
+.mt-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center;}
+#modal-hint{
+  font-family:var(--mono);font-size:10px;color:var(--grd);
+  letter-spacing:.1em;text-align:center;margin-top:auto;
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.4;}50%{opacity:1;}}
+
+/* Mobile modal */
+@media(max-width:900px){
+  #modal{padding:70px 20px 24px;}
+  #modal-body{grid-template-columns:1fr;}
+  #modal-mod-title{font-size:22px;}
+}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .mod-inner,.mod-inner.flip{grid-template-columns:1fr;direction:ltr;}
@@ -313,7 +428,7 @@ footer strong{color:var(--pl);}
     <li><a href="#modulos">Módulos</a></li>
     <li><a href="#pacotes">Pacotes</a></li>
     <li><a href="#instalacao">Instalação</a></li>
-    <li><a href="#cta" class="ncta">Contato</a></li>
+    <li><a href="https://discord.gg/zpxM2ugg8j" class="ncta" target="_blank">Contato</a></li>
   </ul>
 </nav>
 
@@ -412,19 +527,19 @@ footer strong{color:var(--pl);}
         </div>
       </div>
       <div class="sstack fr">
-        <div class="srow c1"><div class="sf sp"><img src="assets/image1.png" alt="Painel boas-vindas" loading="lazy"/><div class="sf-cap">Painel de boas-vindas — seleção de categoria</div></div></div>
+        <div class="srow c1"><div class="sf sp" data-mod="supportdesk" data-img="assets/image1.png"><img src="assets/image1.png" alt="Painel boas-vindas" loading="lazy"/><div class="sf-cap">Painel de boas-vindas — seleção de categoria</div></div></div>
         <div class="srow c2">
-          <div class="sf sp"><img src="assets/image2.png" alt="Categorias" loading="lazy"/><div class="sf-cap">Dropdown de categorias</div></div>
-          <div class="sf sp"><img src="assets/image11.png" alt="Ticket aberto" loading="lazy"/><div class="sf-cap">Ticket com botões de ação</div></div>
+          <div class="sf sp" data-mod="supportdesk" data-img="assets/image2.png"><img src="assets/image2.png" alt="Categorias" loading="lazy"/><div class="sf-cap">Dropdown de categorias</div></div>
+          <div class="sf sp" data-mod="supportdesk" data-img="assets/image11.png"><img src="assets/image11.png" alt="Ticket aberto" loading="lazy"/><div class="sf-cap">Ticket com botões de ação</div></div>
         </div>
         <div class="srow c2">
-          <div class="sf sp"><img src="assets/image9.png" alt="Canais" loading="lazy"/><div class="sf-cap">Canais por categoria</div></div>
-          <div class="sf sp"><img src="assets/image12.png" alt="Mensagem" loading="lazy"/><div class="sf-cap">Mensagem personalizada</div></div>
+          <div class="sf sp" data-mod="supportdesk" data-img="assets/image9.png"><img src="assets/image9.png" alt="Canais" loading="lazy"/><div class="sf-cap">Canais por categoria</div></div>
+          <div class="sf sp" data-mod="supportdesk" data-img="assets/image12.png"><img src="assets/image12.png" alt="Mensagem" loading="lazy"/><div class="sf-cap">Mensagem personalizada</div></div>
         </div>
       </div>
     </div>
     <div class="mod-inner" style="margin-top:60px;align-items:center;">
-      <div class="sstack fl"><div class="srow c1"><div class="sf sp"><img src="assets/image10.png" alt="Logs" loading="lazy"/><div class="sf-cap">Canal de logs com transcripts completos</div></div></div></div>
+      <div class="sstack fl"><div class="srow c1"><div class="sf sp" data-mod="supportdesk" data-img="assets/image10.png"><img src="assets/image10.png" alt="Logs" loading="lazy"/><div class="sf-cap">Canal de logs com transcripts completos</div></div></div></div>
       <div class="fr">
         <p class="eyebrow">Rastreabilidade total</p>
         <h3 style="font-family:var(--head);font-size:28px;letter-spacing:.08em;margin-bottom:12px;line-height:1.1;">Nenhum atendimento<br>se perde</h3>
@@ -511,12 +626,12 @@ footer strong{color:var(--pl);}
       </div>
       <div class="sstack fr">
         <div class="srow c2">
-          <div class="sf sb"><img src="assets/image13.png" alt="Painel geração" loading="lazy"/><div class="sf-cap">Painel de geração de códigos</div></div>
-          <div class="sf sb"><img src="assets/image5.png" alt="Códigos emitidos" loading="lazy"/><div class="sf-cap">Códigos emitidos e usados</div></div>
+          <div class="sf sb" data-mod="partnerhub" data-img="assets/image13.png"><img src="assets/image13.png" alt="Painel geração" loading="lazy"/><div class="sf-cap">Painel de geração de códigos</div></div>
+          <div class="sf sb" data-mod="partnerhub" data-img="assets/image5.png"><img src="assets/image5.png" alt="Códigos emitidos" loading="lazy"/><div class="sf-cap">Códigos emitidos e usados</div></div>
         </div>
         <div class="srow c2">
-          <div class="sf sb"><img src="assets/image7.png" alt="Modal sorteio" loading="lazy"/><div class="sf-cap">Modal de uso do código</div></div>
-          <div class="sf sb"><img src="assets/image6.png" alt="Streamer" loading="lazy"/><div class="sf-cap">Seleção do streamer parceiro</div></div>
+          <div class="sf sb" data-mod="partnerhub" data-img="assets/image7.png"><img src="assets/image7.png" alt="Modal sorteio" loading="lazy"/><div class="sf-cap">Modal de uso do código</div></div>
+          <div class="sf sb" data-mod="partnerhub" data-img="assets/image6.png"><img src="assets/image6.png" alt="Streamer" loading="lazy"/><div class="sf-cap">Seleção do streamer parceiro</div></div>
         </div>
       </div>
     </div>
@@ -545,8 +660,8 @@ footer strong{color:var(--pl);}
         </div>
       </div>
       <div class="sstack fl">
-        <div class="srow c1"><div class="sf sr"><img src="assets/image4.png" alt="Painel auditoria" loading="lazy"/><div class="sf-cap">Painel completo de auditoria multicliente</div></div></div>
-        <div class="srow c1"><div class="sf sr"><img src="assets/image3.png" alt="Alertas" loading="lazy"/><div class="sf-cap">Alertas de up suspeito em massa por IP</div></div></div>
+        <div class="srow c1"><div class="sf sr" data-mod="multiguard" data-img="assets/image4.png"><img src="assets/image4.png" alt="Painel auditoria" loading="lazy"/><div class="sf-cap">Painel completo de auditoria multicliente</div></div></div>
+        <div class="srow c1"><div class="sf sr" data-mod="multiguard" data-img="assets/image3.png"><img src="assets/image3.png" alt="Alertas" loading="lazy"/><div class="sf-cap">Alertas de up suspeito em massa por IP</div></div></div>
       </div>
     </div>
   </div>
@@ -615,7 +730,7 @@ footer strong{color:var(--pl);}
     <h2 class="cta-title fu">Pronto para profissionalizar<br><em>o seu servidor?</em></h2>
     <p class="cta-sub fu">Adquira os módulos do OTAdmin Suite e transforme seu Discord em uma plataforma completa de gestão para o seu OTServer.</p>
     <div class="fu" style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-      <a href="https://discord.gg/" class="btn-main" target="_blank">[ 💬 ENTRAR EM CONTATO ]</a>
+      <a href="https://discord.gg/zpxM2ugg8j" class="btn-main" target="_blank">[ 💬 ENTRAR EM CONTATO ]</a>
       <a href="#pacotes" class="btn-ghost">[ VER PACOTES ]</a>
     </div>
     <div class="cta-badges fu">
@@ -630,6 +745,33 @@ footer strong{color:var(--pl);}
 <footer>
   <p><strong>OTAdmin Suite</strong> &nbsp;·&nbsp; Módulos profissionais para servidores de Tibia &nbsp;·&nbsp; v1.0</p>
 </footer>
+
+<!-- ═══════ MODAL LIGHTBOX ═══════ -->
+<div id="modal-backdrop"></div>
+<div id="modal" role="dialog" aria-modal="true">
+  <div id="modal-topbar">
+    <div id="modal-topbar-left">
+      <span id="modal-mod-tag"></span>
+      <span id="modal-mod-title"></span>
+    </div>
+    <button id="modal-close-btn" onclick="closeModal()">
+      <span>ESC</span> FECHAR
+    </button>
+  </div>
+  <div id="modal-body">
+    <div>
+      <div id="modal-img-wrap">
+        <img id="modal-main-img" src="" alt=""/>
+      </div>
+      <div id="modal-img-nav"></div>
+    </div>
+    <div id="modal-info">
+      <p id="modal-desc"></p>
+      <div id="modal-table"></div>
+      <p id="modal-hint">[ PRESSIONE ESC PARA FECHAR ]</p>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── CURSOR ─────────────────────────────────────
@@ -679,7 +821,6 @@ window.addEventListener('scroll',()=>document.getElementById('navbar').classList
 // ── GSAP SCROLLTRIGGER ─────────────────────────
 gsap.registerPlugin(ScrollTrigger);
 
-// Hero
 gsap.timeline()
   .to('#he', {opacity:1,duration:.5,ease:'power2.out'})
   .to('#t1', {opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.2')
@@ -688,7 +829,6 @@ gsap.timeline()
   .to('#hb', {opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.3')
   .to('#hm', {opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.3');
 
-// Scroll reveals
 document.querySelectorAll('.fu').forEach(el=>{
   gsap.to(el,{scrollTrigger:{trigger:el,start:'top 92%'},opacity:1,y:0,duration:.7,ease:'power3.out'});
 });
@@ -710,14 +850,194 @@ document.querySelectorAll('.su').forEach((el)=>{
   });
 });
 
-// Nav active
 const sections=[...document.querySelectorAll('section[id]')];
-const links=[...document.querySelectorAll('.nlinks a')];
+const navLinks=[...document.querySelectorAll('.nlinks a')];
 window.addEventListener('scroll',()=>{
   let cur='';
   sections.forEach(s=>{if(scrollY>=s.offsetTop-140)cur=s.id;});
-  links.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--white)':'';});
+  navLinks.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--white)':'';});
 },{ passive:true });
+
+// ═══════════════════════════════════════════════
+// MODAL LIGHTBOX SYSTEM
+// ═══════════════════════════════════════════════
+
+// Module data — all info shown in the modal right panel
+const MODULE_DATA = {
+  supportdesk: {
+    num:   '// MÓDULO 01',
+    title: 'SupportDesk',
+    color: '#a78bfa',
+    borderColor: '#7c3aed',
+    desc: 'Transforma o suporte do servidor em um fluxo profissional e auditável. Cada pedido de ajuda vira um ticket rastreado, atribuído e registrado — sem mensagens soltas no Discord.',
+    features: [
+      ['🎫', 'Painel com botões por categoria de atendimento'],
+      ['🔒', 'Abertura automática de canal privado por ticket'],
+      ['👤', 'Botão de assumir ticket pela staff'],
+      ['📄', 'Transcript completo do atendimento por DM'],
+      ['⭐', 'Avaliação pós-atendimento pelo jogador'],
+      ['🗂️', 'Texto personalizado por categoria de ticket'],
+      ['🛡️', 'Controle de acesso por cargos da staff'],
+      ['📋', 'Histórico completo no canal de logs'],
+    ],
+    images: [
+      { src: 'assets/image1.png',  cap: 'Painel de boas-vindas' },
+      { src: 'assets/image2.png',  cap: 'Categorias disponíveis' },
+      { src: 'assets/image11.png', cap: 'Ticket com botões de ação' },
+      { src: 'assets/image9.png',  cap: 'Canais por categoria' },
+      { src: 'assets/image12.png', cap: 'Mensagem personalizada' },
+      { src: 'assets/image10.png', cap: 'Log de transcripts' },
+    ],
+  },
+  partnerhub: {
+    num:   '// MÓDULO 03',
+    title: 'PartnerHub',
+    color: '#38bdf8',
+    borderColor: '#38bdf8',
+    desc: 'Profissionaliza o marketing do servidor com fluxo estruturado para parcerias com streamers. Sorteios automatizados com códigos rastreáveis e painel completo de emissão.',
+    features: [
+      ['📢', 'Canal de candidatura formal para streamers'],
+      ['✅', 'Fluxo de aprovação de parcerias pela staff'],
+      ['🎟️', 'Geração de códigos promocionais personalizados'],
+      ['🎰', 'Sistema de sorteio automatizado no Discord'],
+      ['💰', 'Streamer vinculado ao cupom para cashback'],
+      ['📊', 'Painel de códigos emitidos e utilizados'],
+      ['📝', 'Log completo de ações promocionais'],
+      ['📅', 'Histórico de campanhas realizadas'],
+    ],
+    images: [
+      { src: 'assets/image13.png', cap: 'Painel de geração de códigos' },
+      { src: 'assets/image5.png',  cap: 'Códigos emitidos e usados' },
+      { src: 'assets/image7.png',  cap: 'Modal de uso do código' },
+      { src: 'assets/image6.png',  cap: 'Seleção do streamer parceiro' },
+    ],
+  },
+  multiguard: {
+    num:   '// MÓDULO 04',
+    title: 'MultiGuard',
+    color: '#f87171',
+    borderColor: '#f87171',
+    desc: 'Monitora multiclient em tempo real lendo direto do banco MySQL. Agrupa conexões por IP, detecta up suspeito em massa e exibe painel administrativo completo no Discord.',
+    features: [
+      ['🔍', 'Leitura automática de jogadores online'],
+      ['📡', 'Agrupamento de conexões por IP'],
+      ['⚠️', 'Detecção de excesso de personagens por IP'],
+      ['📈', 'Identificação de up simultâneo suspeito'],
+      ['📺', 'Painel administrativo atualizado automaticamente'],
+      ['🕐', 'Histórico recente de alertas no Discord'],
+      ['⚙️', 'Configuração de limites por IP'],
+      ['🗄️', 'Integração direta com banco MySQL'],
+    ],
+    images: [
+      { src: 'assets/image4.png', cap: 'Painel de auditoria multicliente' },
+      { src: 'assets/image3.png', cap: 'Alertas de up suspeito por IP' },
+    ],
+  },
+};
+
+// State
+let activeModule = null;
+let activeImgIdx = 0;
+
+// Elements
+const backdrop   = document.getElementById('modal-backdrop');
+const modal      = document.getElementById('modal');
+const modTag     = document.getElementById('modal-mod-tag');
+const modTitle   = document.getElementById('modal-mod-title');
+const mainImg    = document.getElementById('modal-main-img');
+const imgNav     = document.getElementById('modal-img-nav');
+const descEl     = document.getElementById('modal-desc');
+const tableEl    = document.getElementById('modal-table');
+
+function openModal(modKey, startImg) {
+  const data = MODULE_DATA[modKey];
+  if (!data) return;
+  activeModule = modKey;
+
+  // Set tag + title
+  modTag.textContent = data.num;
+  modTag.style.color = data.color;
+  modTag.style.borderColor = data.color;
+  modTitle.textContent = data.title;
+  modTitle.style.color = data.color;
+  modTitle.style.textShadow = `0 0 40px ${data.borderColor}80`;
+
+  // Set description
+  descEl.textContent = data.desc;
+
+  // Build features table
+  tableEl.innerHTML = `<div class="mt-head">// COMO FUNCIONA</div>` +
+    data.features.map(([icon, text]) =>
+      `<div class="mt-row"><span class="mt-icon">${icon}</span>${text}</div>`
+    ).join('');
+
+  // Build image thumbnails
+  imgNav.innerHTML = data.images.map((img, i) =>
+    `<div class="modal-thumb${i===0?' active':''}" data-idx="${i}" title="${img.cap}">
+      <img src="${img.src}" alt="${img.cap}" loading="lazy"/>
+    </div>`
+  ).join('');
+
+  // Set main image
+  const imgIdx = data.images.findIndex(i => i.src === startImg);
+  setModalImage(imgIdx >= 0 ? imgIdx : 0);
+
+  // Thumb click
+  imgNav.querySelectorAll('.modal-thumb').forEach(th => {
+    th.addEventListener('click', () => setModalImage(+th.dataset.idx));
+  });
+
+  // Show
+  document.body.style.overflow = 'hidden';
+  backdrop.classList.add('open');
+  modal.classList.add('open');
+
+  // Increase matrix opacity
+  document.getElementById('mc').style.opacity = '.55';
+}
+
+function setModalImage(idx) {
+  const data = MODULE_DATA[activeModule];
+  activeImgIdx = idx;
+  mainImg.src = data.images[idx].src;
+  mainImg.alt = data.images[idx].cap;
+  imgNav.querySelectorAll('.modal-thumb').forEach((th, i) => {
+    th.classList.toggle('active', i === idx);
+    if (i === idx) th.style.borderColor = data.borderColor;
+    else th.style.borderColor = '';
+  });
+}
+
+function closeModal() {
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('mc').style.opacity = '.3';
+  activeModule = null;
+}
+
+// Click on screenshots
+document.querySelectorAll('.sf[data-mod]').forEach(frame => {
+  frame.addEventListener('click', () => {
+    const modKey = frame.dataset.mod;
+    const imgSrc = frame.dataset.img;
+    openModal(modKey, imgSrc);
+  });
+});
+
+// Click backdrop to close
+backdrop.addEventListener('click', closeModal);
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && activeModule) closeModal();
+  // Arrow keys to navigate images
+  if (activeModule) {
+    const data = MODULE_DATA[activeModule];
+    if (e.key === 'ArrowRight') setModalImage((activeImgIdx + 1) % data.images.length);
+    if (e.key === 'ArrowLeft')  setModalImage((activeImgIdx - 1 + data.images.length) % data.images.length);
+  }
+});
 </script>
 </body>
 </html>
